@@ -50,4 +50,6 @@ add_custom_command(TARGET vkvoxel POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${PROJECT_BINARY_DIR}/shaders"
     "$<TARGET_FILE_DIR:vkvoxel>/shaders"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_BINARY_DIR}/textures/"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/textures" "${PROJECT_BINARY_DIR}/textures"
 )
