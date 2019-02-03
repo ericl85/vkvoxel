@@ -36,6 +36,7 @@ namespace VkVoxel {
         void createSurface(VkInstance instance);
         void createSwapChain();
         void createImageViews();
+        void createDepthResources();
         void createRenderPass();
         void createDescriptorSetLayout();
         void createGraphicsPipeline();
@@ -58,8 +59,13 @@ namespace VkVoxel {
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
         VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes);
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-        VkImageView createImageView(VkImage image, VkFormat format);
+        VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
         VkShaderModule createShaderModule(const std::vector<char>& code);
+        VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+        VkFormat findDepthFormat();
+        bool hasStencilComponent(VkFormat format);
+        void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memoryUsage, VkImage& image, VmaAllocation& imageAllocation);
+        void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
         // Vulkan constants
         const std::vector<const char*> validationLayers = {
@@ -98,6 +104,10 @@ namespace VkVoxel {
         std::vector<VkSemaphore> renderFinishedSemaphores;
         std::vector<VkFence> inFlightFences;
         size_t currentFrame = 0;
+
+        VkImage depthImage;
+        VmaAllocation depthImageMemory;
+        VkImageView depthImageView;
 
         std::vector<BlockType> blockTypes;
 

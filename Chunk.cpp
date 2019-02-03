@@ -39,7 +39,7 @@ namespace VkVoxel {
                         for (auto it = blockType.vertexes.begin(); it != blockType.vertexes.end(); it++) {
                             // Make a copy of the block from the block type with it's position translated
                             Vertex blockVertex;
-                            blockVertex.pos = (*it).pos + (glm::vec3(xBlock, yBlock, zBlock) * 3.0f);
+                            blockVertex.pos = (*it).pos + (glm::vec3(xBlock, yBlock, zBlock) * 2.0f);
                             blockVertex.color = glm::vec3((*it).color);
                             blockVertex.texCoord = glm::vec2((*it).texCoord);
 

@@ -15,6 +15,7 @@ namespace VkVoxel {
         
         void setPosition(const glm::vec3& position);
         glm::vec3 getPosition();
+        glm::vec3 getFront();
 
         void setRotation(float pitch, float yaw);
         float getPitch();

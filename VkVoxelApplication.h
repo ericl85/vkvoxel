@@ -12,6 +12,10 @@ namespace VkVoxel {
         void init();
         void mainLoop();
         void cleanup();
+        
+        bool firstMouse = true;
+        float lastMouseX;
+        float lastMouseY;
 
         VkRenderer renderer;
         std::shared_ptr<Camera> camera;
