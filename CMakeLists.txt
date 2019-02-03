@@ -31,6 +31,32 @@ add_custom_target(
 
 add_executable(vkvoxel
   Main.cpp
+  Block.h
+  BlockType.h
+  BlockType.cpp
+  Camera.cpp
+  Camera.h
+  Chunk.h
+  Chunk.cpp
+  Plane.cpp
+  Plane.h
+  Frustum.cpp
+  Frustum.h
+  Renderer.cpp
+  Renderer.h
+  TextureAtlas.cpp
+  TextureAtlas.h
+  Vertex.h
+  Vertex.cpp
+  VkChunk.h
+  VkChunk.cpp
+  VkManager.h
+  VkManager.cpp
+  VkRenderer.h
+  VkRenderer.cpp
+  VkVoxelApplication.h
+  VkVoxelApplication.cpp
+  VkUtil.h
 )
 
 add_dependencies(vkvoxel Shaders)
