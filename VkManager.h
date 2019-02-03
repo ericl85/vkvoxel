@@ -35,6 +35,7 @@ namespace VkVoxel {
         QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
         bool checkDeviceExtensionSupport(VkPhysicalDevice device);
         SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
+        bool hasStencilComponent(VkFormat format);
 
         // Vulkan constants
         const std::vector<const char*> validationLayers = {
@@ -63,6 +64,9 @@ namespace VkVoxel {
         // Single time command buffer prep
         VkCommandBuffer beginSingleTimeCommands();
         void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+
+        // Image layout transition
+        void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
     };
 }
 

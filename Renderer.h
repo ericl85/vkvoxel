@@ -14,6 +14,7 @@ namespace VkVoxel {
         virtual void initialize() = 0;
         virtual void cleanup() = 0;
         virtual void render() = 0;
+        virtual void waitIdle() = 0;
 
         std::shared_ptr<Camera> getCamera();
         void setCamera(std::shared_ptr<Camera> camera);

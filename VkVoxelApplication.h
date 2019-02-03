@@ -8,6 +8,8 @@ namespace VkVoxel {
     public:
         void run();
 
+        void resizeFramebuffer();
+
     private:
         void init();
         void mainLoop();

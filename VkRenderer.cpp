@@ -8,11 +8,21 @@
 #include "Vertex.h"
 
 namespace VkVoxel {
+    void VkRenderer::waitIdle() {
+        vkDeviceWaitIdle(_manager->getDevice());
+    }
+
     void VkRenderer::cleanup() {
         VkDevice device = _manager->getDevice();
         VmaAllocator allocator = _manager->getAllocator();
 
         cleanupSwapChain();
+
+        vkDestroySampler(device, textureSampler, nullptr);
+        textureAtlas->cleanup();
+
+        vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+        vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 
         // Cleanup uniform buffers
         for (size_t i = 0; i < swapChainImages.size(); i++) {
@@ -37,6 +47,10 @@ namespace VkVoxel {
     void VkRenderer::cleanupSwapChain() {
         VkDevice device = _manager->getDevice();
         VkCommandPool commandPool = _manager->getCommandPool();
+        VmaAllocator allocator = _manager->getAllocator();
+
+        vkDestroyImageView(device, depthImageView, nullptr);
+        vmaDestroyImage(allocator, depthImage, depthImageMemory);
 
         for (auto framebuffer : swapChainFramebuffers) {
             vkDestroyFramebuffer(device, framebuffer, nullptr);
@@ -53,6 +67,26 @@ namespace VkVoxel {
         }
 
         vkDestroySwapchainKHR(device, swapChain, nullptr);
+    }
+
+    void VkRenderer::recreateSwapChain() {
+        int width = 0, height = 0;
+        while (width == 0 || height == 0) {
+            glfwGetFramebufferSize(window, &width, &height);
+            glfwWaitEvents();
+        }
+
+        vkDeviceWaitIdle(_manager->getDevice());
+
+        cleanupSwapChain();
+
+        createSwapChain();
+        createImageViews();
+        createRenderPass();
+        createGraphicsPipeline();
+        createDepthResources();
+        createFramebuffers();
+        createCommandBuffers();
     }
 
     void VkRenderer::initialize() {
@@ -80,9 +114,44 @@ namespace VkVoxel {
         createGraphicsPipeline();
         createFramebuffers();
 
-        blockTypes.resize(2);
+        createTextureAtlas();
+        createTextureSampler();
+
+        blockTypes.resize(4);
         blockTypes[1].id = 1;
         blockTypes[1].vertexes = BLOCK_VERTICES;
+        blockTypes[2].id = 2;
+        blockTypes[2].vertexes = BLOCK_VERTICES;
+        blockTypes[3].id = 3;
+        blockTypes[3].vertexes = BLOCK_VERTICES;
+
+        for (size_t i = 0; i < BLOCK_VERTICES.size() - 4; i += 4) {
+            // Do top face
+            if (i == 16) {
+                blockTypes[1].vertexes[i + 0].texCoord = { 0.0f, 0.0f };
+                blockTypes[1].vertexes[i + 1].texCoord = { 0.5f, 0.0f };
+                blockTypes[1].vertexes[i + 2].texCoord = { 0.5f, 0.5f };
+                blockTypes[1].vertexes[i + 3].texCoord = { 0.0f, 0.5f };
+            }
+            else
+            {
+                blockTypes[1].vertexes[i + 0].texCoord = { 0.5f, 0.0f };
+                blockTypes[1].vertexes[i + 1].texCoord = { 1.0f, 0.0f };
+                blockTypes[1].vertexes[i + 2].texCoord = { 1.0f, 0.5f };
+                blockTypes[1].vertexes[i + 3].texCoord = { 0.5f, 0.5f };
+            }
+
+            blockTypes[2].vertexes[i + 0].texCoord = { 0.5f, 0.0f };
+            blockTypes[2].vertexes[i + 1].texCoord = { 1.0f, 0.0f };
+            blockTypes[2].vertexes[i + 2].texCoord = { 1.0f, 0.5f };
+            blockTypes[2].vertexes[i + 3].texCoord = { 0.5f, 0.5f };
+
+            blockTypes[3].vertexes[i + 0].texCoord = { 0.0f, 0.5f };
+            blockTypes[3].vertexes[i + 1].texCoord = { 0.5f, 0.5f };
+            blockTypes[3].vertexes[i + 2].texCoord = { 0.5f, 1.0f };
+            blockTypes[3].vertexes[i + 3].texCoord = { 0.0f, 1.0f };
+        }
+
         createChunk();
 
         createUniformBuffers();
@@ -106,7 +175,28 @@ namespace VkVoxel {
             }
         }
 
+        chunk->blocks[0][8][8] = 2;
+        chunk->blocks[0][2][2] = 3;
+        chunk->blocks[0][2][3] = 3;
+        chunk->blocks[0][2][4] = 3;
+        chunk->blocks[0][2][5] = 3;
+        chunk->blocks[0][2][6] = 3;
+        chunk->blocks[0][2][7] = 3;
+        chunk->blocks[0][2][8] = 3;
+        chunk->blocks[0][2][9] = 3;
+        chunk->blocks[0][2][10] = 3;
+        chunk->blocks[0][2][11] = 3;
+        chunk->blocks[0][2][12] = 3;
+        chunk->blocks[0][2][13] = 3;
+        chunk->blocks[1][4][8] = 2;
+        chunk->blocks[1][6][8] = 2;
+
         chunk->build(blockTypes);
+    }
+
+    void VkRenderer::createTextureAtlas() {
+        textureAtlas = new VkTextureAtlas("textures/textureatlas.png", _manager);
+        textureAtlas->initialize();
     }
 
     void VkRenderer::updateUniformBuffer(uint32_t imageIndex) {
@@ -114,8 +204,6 @@ namespace VkVoxel {
         ubo.model = chunk->model;
         ubo.view = _camera->getView();
         ubo.proj = _camera->getProjection();
-        //ubo.view = glm::lookAt(_camera->getPosition(), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        //ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
 
         // Compensate for OpenGL vs. Vulkan Y coordinate flipping
         ubo.proj[1][1] *= -1;
@@ -137,7 +225,7 @@ namespace VkVoxel {
         VkResult result = vkAcquireNextImageKHR(device, swapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            //recreateSwapChain();
+            recreateSwapChain();
             return;
         }
         else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
@@ -188,7 +276,7 @@ namespace VkVoxel {
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
             framebufferResized = false;
-            // recreateSwapChain();
+            recreateSwapChain();
         }
         else if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to present swap chain image!");
@@ -351,14 +439,14 @@ namespace VkVoxel {
         uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
         uboLayoutBinding.pImmutableSamplers = nullptr;
 
-        /*VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
+        VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
         samplerLayoutBinding.binding = 1;
         samplerLayoutBinding.descriptorCount = 1;
         samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         samplerLayoutBinding.pImmutableSamplers = nullptr;
-        samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;*/
+        samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-        std::array<VkDescriptorSetLayoutBinding, 1> bindings = { uboLayoutBinding };
+        std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
 
         VkDescriptorSetLayoutCreateInfo layoutInfo = {};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -550,6 +638,30 @@ namespace VkVoxel {
         }
     }
 
+    void VkRenderer::createTextureSampler() {
+        VkSamplerCreateInfo samplerInfo = {};
+        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerInfo.magFilter = VK_FILTER_LINEAR;
+        samplerInfo.minFilter = VK_FILTER_LINEAR;
+        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.anisotropyEnable = VK_TRUE;
+        samplerInfo.maxAnisotropy = 16;
+        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        samplerInfo.unnormalizedCoordinates = VK_FALSE;
+        samplerInfo.compareEnable = VK_FALSE;
+        samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+        samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        samplerInfo.mipLodBias = 0.0f;
+        samplerInfo.minLod = 0.0f;
+        samplerInfo.maxLod = 0.0f;
+
+        if (vkCreateSampler(_manager->getDevice(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create sampler!");
+        }
+    }
+
     void VkRenderer::createDescriptorPool() {
         VkDevice device = _manager->getDevice();
 
@@ -593,12 +705,12 @@ namespace VkVoxel {
             bufferInfo.offset = 0;
             bufferInfo.range = sizeof(UniformBufferObject);
 
-            /*VkDescriptorImageInfo imageInfo = {};
+            VkDescriptorImageInfo imageInfo = {};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfo.imageView = textureImageView;
-            imageInfo.sampler = textureSampler;*/
+            imageInfo.imageView = textureAtlas->imageView;
+            imageInfo.sampler = textureSampler;
 
-            std::array<VkWriteDescriptorSet, 1> descriptorWrites = {};
+            std::array<VkWriteDescriptorSet, 2> descriptorWrites = {};
             descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[0].dstSet = descriptorSets[i];
             descriptorWrites[0].dstBinding = 0;
@@ -609,7 +721,6 @@ namespace VkVoxel {
             descriptorWrites[0].pImageInfo = nullptr;
             descriptorWrites[0].pTexelBufferView = nullptr;
 
-            /*
             descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[1].dstSet = descriptorSets[i];
             descriptorWrites[1].dstBinding = 1;
@@ -617,7 +728,6 @@ namespace VkVoxel {
             descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             descriptorWrites[1].descriptorCount = 1;
             descriptorWrites[1].pImageInfo = &imageInfo;
-            */
 
             vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         }

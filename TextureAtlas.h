@@ -10,13 +10,14 @@ namespace VkVoxel {
         TextureAtlas(std::string fileName);
 
         void initialize();
+        virtual void cleanup() = 0;
 
     private:
         std::string _fileName;
 
     protected:
-        virtual void prepare(int texWidth, int texHeight, int texChannels, stbi_uc* pixels) = 0;
-        virtual void cleanup() = 0;
+        virtual void prepare(uint32_t texWidth, uint32_t texHeight, int texChannels, stbi_uc* pixels) = 0;
+        
     };
 }
 

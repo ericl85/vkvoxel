@@ -54,6 +54,8 @@ add_executable(vkvoxel
   VkManager.cpp
   VkRenderer.h
   VkRenderer.cpp
+  VkTextureAtlas.h
+  VkTextureAtlas.cpp
   VkVoxelApplication.h
   VkVoxelApplication.cpp
   VkUtil.h

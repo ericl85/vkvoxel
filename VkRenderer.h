@@ -6,6 +6,7 @@
 
 #include "VkManager.h"
 #include "VkChunk.h"
+#include "VkTextureAtlas.h"
 #include "Camera.h"
 #include "Renderer.h"
 
@@ -16,9 +17,12 @@
 namespace VkVoxel {
     class VkRenderer : public Renderer {
     public:
+        bool framebufferResized = false;
+
         virtual void cleanup();
         virtual void initialize();
         virtual void render();
+        virtual void waitIdle();
 
         void setWindow(GLFWwindow* window);
 
@@ -26,6 +30,10 @@ namespace VkVoxel {
         std::shared_ptr<VkManager> _manager;
 
         // Just testing with a single chunk for now
+        VkTextureAtlas* textureAtlas;
+        void createTextureAtlas();
+        VkSampler textureSampler;
+
         VkChunk* chunk;
         void createChunk();
 
@@ -35,12 +43,14 @@ namespace VkVoxel {
         // Vulkan initialization functions
         void createSurface(VkInstance instance);
         void createSwapChain();
+        void recreateSwapChain();
         void createImageViews();
         void createDepthResources();
         void createRenderPass();
         void createDescriptorSetLayout();
         void createGraphicsPipeline();
         void createFramebuffers();
+        void createTextureSampler();
         void createUniformBuffers();
         void createDescriptorPool();
         void createDescriptorSets();
@@ -110,8 +120,6 @@ namespace VkVoxel {
         VkImageView depthImageView;
 
         std::vector<BlockType> blockTypes;
-
-        bool framebufferResized;
     };
 }
 

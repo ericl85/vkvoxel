@@ -7,6 +7,7 @@
 bool firstMouse = true;
 float mouseX = WINDOW_WIDTH / 2;
 float mouseY = WINDOW_HEIGHT / 2;
+bool framebufferResized = false;
 
 void mouse_callback(GLFWwindow* window, double xPos, double yPos) {
     mouseX = (float)xPos;
@@ -14,10 +15,19 @@ void mouse_callback(GLFWwindow* window, double xPos, double yPos) {
 }
 
 namespace VkVoxel {
+    void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+        auto app = reinterpret_cast<VkVoxelApplication*>(glfwGetWindowUserPointer(window));
+        app->resizeFramebuffer();
+    }
+    
     void VkVoxelApplication::run() {
         init();
         mainLoop();
         cleanup();
+    }
+
+    void VkVoxelApplication::resizeFramebuffer() {
+        renderer.framebufferResized = true;
     }
 
     void VkVoxelApplication::mainLoop() {
@@ -88,6 +98,7 @@ namespace VkVoxel {
     }
 
     void VkVoxelApplication::cleanup() {
+        renderer.waitIdle();
         renderer.cleanup();
 
         glfwDestroyWindow(window);
