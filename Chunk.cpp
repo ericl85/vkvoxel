@@ -6,9 +6,9 @@
 #include "Chunk.h"
 
 namespace VkVoxel {
-    Chunk::Chunk(uint32_t x, uint32_t z) {
+    Chunk::Chunk(int x, int z) {
         _model = glm::mat4x4(1.0f);
-        _model = glm::translate(_model, glm::vec3((float)(x * CHUNK_SIZE * 2.0f), 0, (float)(z * CHUNK_SIZE * 2.0f)));
+        _model = glm::translate(_model, glm::vec3((float)(x * CHUNK_SIZE), 0, (float)(z * CHUNK_SIZE)));
 
         // Zero out the blocks
         for (int yBlock = 0; yBlock < CHUNK_HEIGHT; yBlock++) {
@@ -37,7 +37,117 @@ namespace VkVoxel {
                     if (blockIndex > 0) {
                         BlockType blockType = blockTypes[blockIndex];
 
-                        for (auto it = blockType.vertexes.begin(); it != blockType.vertexes.end(); it++) {
+                        glm::vec3 blockTranslation = glm::vec3(xBlock, yBlock, zBlock);
+
+                        // Front face neighbor test: if we're at the front or if the block in front of us is air, we add the front vertices
+                        if (zBlock == 0 || blocks[yBlock][xBlock][zBlock - 1] == 0) {
+                            vertices.push_back({ FRONT_FACE[0] + blockTranslation, blockType.vertexes[0].color, blockType.vertexes[0].texCoord });
+                            vertices.push_back({ FRONT_FACE[1] + blockTranslation, blockType.vertexes[1].color, blockType.vertexes[1].texCoord });
+                            vertices.push_back({ FRONT_FACE[2] + blockTranslation, blockType.vertexes[2].color, blockType.vertexes[2].texCoord });
+                            vertices.push_back({ FRONT_FACE[3] + blockTranslation, blockType.vertexes[3].color, blockType.vertexes[3].texCoord });
+
+                            indices.push_back(_vertexCount);
+                            indices.push_back(_vertexCount + 1);
+                            indices.push_back(_vertexCount + 2);
+                            indices.push_back(_vertexCount + 2);
+                            indices.push_back(_vertexCount + 3);
+                            indices.push_back(_vertexCount);
+
+                            _vertexCount += 4;
+                            _indexCount += 6;
+                        }
+
+                        // Left face neighbor test
+                        if (xBlock == 0 || blocks[yBlock][xBlock - 1][zBlock] == 0) {
+                            vertices.push_back({ LEFT_FACE[0] + blockTranslation, blockType.vertexes[4].color, blockType.vertexes[4].texCoord });
+                            vertices.push_back({ LEFT_FACE[1] + blockTranslation, blockType.vertexes[5].color, blockType.vertexes[5].texCoord });
+                            vertices.push_back({ LEFT_FACE[2] + blockTranslation, blockType.vertexes[6].color, blockType.vertexes[6].texCoord });
+                            vertices.push_back({ LEFT_FACE[3] + blockTranslation, blockType.vertexes[7].color, blockType.vertexes[7].texCoord });
+
+                            indices.push_back(_vertexCount);
+                            indices.push_back(_vertexCount + 1);
+                            indices.push_back(_vertexCount + 2);
+                            indices.push_back(_vertexCount + 2);
+                            indices.push_back(_vertexCount + 3);
+                            indices.push_back(_vertexCount);
+
+                            _vertexCount += 4;
+                            _indexCount += 6;
+                        }
+
+                        // Right face neighbor test
+                        if (xBlock == (CHUNK_SIZE - 1) || blocks[yBlock][xBlock + 1][zBlock] == 0) {
+                            vertices.push_back({ RIGHT_FACE[0] + blockTranslation, blockType.vertexes[8].color, blockType.vertexes[8].texCoord });
+                            vertices.push_back({ RIGHT_FACE[1] + blockTranslation, blockType.vertexes[9].color, blockType.vertexes[9].texCoord });
+                            vertices.push_back({ RIGHT_FACE[2] + blockTranslation, blockType.vertexes[10].color, blockType.vertexes[10].texCoord });
+                            vertices.push_back({ RIGHT_FACE[3] + blockTranslation, blockType.vertexes[11].color, blockType.vertexes[11].texCoord });
+
+                            indices.push_back(_vertexCount);
+                            indices.push_back(_vertexCount + 1);
+                            indices.push_back(_vertexCount + 2);
+                            indices.push_back(_vertexCount + 2);
+                            indices.push_back(_vertexCount + 3);
+                            indices.push_back(_vertexCount);
+
+                            _vertexCount += 4;
+                            _indexCount += 6;
+                        }
+
+                        // Back face neighbor test
+                        if (zBlock == (CHUNK_SIZE - 1) || blocks[yBlock][xBlock][zBlock + 1] == 0) {
+                            vertices.push_back({ BACK_FACE[0] + blockTranslation, blockType.vertexes[12].color, blockType.vertexes[12].texCoord });
+                            vertices.push_back({ BACK_FACE[1] + blockTranslation, blockType.vertexes[13].color, blockType.vertexes[13].texCoord });
+                            vertices.push_back({ BACK_FACE[2] + blockTranslation, blockType.vertexes[14].color, blockType.vertexes[14].texCoord });
+                            vertices.push_back({ BACK_FACE[3] + blockTranslation, blockType.vertexes[15].color, blockType.vertexes[15].texCoord });
+
+                            indices.push_back(_vertexCount);
+                            indices.push_back(_vertexCount + 1);
+                            indices.push_back(_vertexCount + 2);
+                            indices.push_back(_vertexCount + 2);
+                            indices.push_back(_vertexCount + 3);
+                            indices.push_back(_vertexCount);
+
+                            _vertexCount += 4;
+                            _indexCount += 6;
+                        }
+
+                        // Top face neighbor test
+                        if (yBlock == (CHUNK_HEIGHT - 1) || blocks[yBlock + 1][xBlock][zBlock] == 0) {
+                            vertices.push_back({ TOP_FACE[0] + blockTranslation, blockType.vertexes[16].color, blockType.vertexes[16].texCoord });
+                            vertices.push_back({ TOP_FACE[1] + blockTranslation, blockType.vertexes[17].color, blockType.vertexes[17].texCoord });
+                            vertices.push_back({ TOP_FACE[2] + blockTranslation, blockType.vertexes[18].color, blockType.vertexes[18].texCoord });
+                            vertices.push_back({ TOP_FACE[3] + blockTranslation, blockType.vertexes[19].color, blockType.vertexes[19].texCoord });
+
+                            indices.push_back(_vertexCount);
+                            indices.push_back(_vertexCount + 1);
+                            indices.push_back(_vertexCount + 2);
+                            indices.push_back(_vertexCount + 2);
+                            indices.push_back(_vertexCount + 3);
+                            indices.push_back(_vertexCount);
+
+                            _vertexCount += 4;
+                            _indexCount += 6;
+                        }
+
+                        // Bottom face neighbor test
+                        if (yBlock == 0 || blocks[yBlock - 1][xBlock][zBlock] == 0) {
+                            vertices.push_back({ BOTTOM_FACE[0] + blockTranslation, blockType.vertexes[20].color, blockType.vertexes[20].texCoord });
+                            vertices.push_back({ BOTTOM_FACE[1] + blockTranslation, blockType.vertexes[21].color, blockType.vertexes[21].texCoord });
+                            vertices.push_back({ BOTTOM_FACE[2] + blockTranslation, blockType.vertexes[22].color, blockType.vertexes[22].texCoord });
+                            vertices.push_back({ BOTTOM_FACE[3] + blockTranslation, blockType.vertexes[23].color, blockType.vertexes[23].texCoord });
+
+                            indices.push_back(_vertexCount);
+                            indices.push_back(_vertexCount + 1);
+                            indices.push_back(_vertexCount + 2);
+                            indices.push_back(_vertexCount + 2);
+                            indices.push_back(_vertexCount + 3);
+                            indices.push_back(_vertexCount);
+
+                            _vertexCount += 4;
+                            _indexCount += 6;
+                        }
+
+                        /* for (auto it = blockType.vertexes.begin(); it != blockType.vertexes.end(); it++) {
                             // Make a copy of the block from the block type with it's position translated
                             Vertex blockVertex;
                             blockVertex.pos = (*it).pos + (glm::vec3(xBlock, yBlock, zBlock) * 2.0f);
@@ -54,7 +164,7 @@ namespace VkVoxel {
                             uint32_t blockIndex = BLOCK_INDICES[i] + (BLOCK_VERTICES.size() * newSize);
                             indices.push_back(blockIndex);
                             _indexCount++;
-                        }
+                        } */
 
                         newSize++;
                     }

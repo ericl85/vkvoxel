@@ -15,7 +15,7 @@ namespace VkVoxel {
     public:
         uint32_t blocks[CHUNK_HEIGHT][CHUNK_SIZE][CHUNK_SIZE];
 
-        Chunk(uint32_t x, uint32_t y);
+        Chunk(int x, int y);
         void build(const std::vector<BlockType>& blockTypes);
         glm::mat4x4 getTransform(const glm::mat4x4& proj, const glm::mat4x4& view);
         uint32_t getVertexCount();

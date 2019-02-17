@@ -7,16 +7,31 @@ namespace VkVoxel {
         _renderer = renderer;
         _renderer->setCamera(_camera);
 
-        _chunks.resize(2);
+        _chunks.resize(9);
 
-        _chunks[0] = _renderer->createChunk(0, 0);
-        _chunks[1] = _renderer->createChunk(1, 1);
+        _chunks[0] = _renderer->createChunk(0, -1);
+        _chunks[1] = _renderer->createChunk(0, 0);
+        _chunks[2] = _renderer->createChunk(0, 1);
+        _chunks[3] = _renderer->createChunk(1, -1);
+        _chunks[4] = _renderer->createChunk(1, 0);
+        _chunks[5] = _renderer->createChunk(1, 1);
+        _chunks[6] = _renderer->createChunk(-1, -1);
+        _chunks[7] = _renderer->createChunk(-1, 0);
+        _chunks[8] = _renderer->createChunk(-1, 1);
+        
 
         // Temporary: Generate a ground
         for (int xBlock = 0; xBlock < CHUNK_SIZE; xBlock++) {
             for (int zBlock = 0; zBlock < CHUNK_SIZE; zBlock++) {
                 _chunks[0]->blocks[0][xBlock][zBlock] = 1;
-                _chunks[1]->blocks[0][xBlock][zBlock] = 3;
+                _chunks[1]->blocks[0][xBlock][zBlock] = 1;
+                _chunks[2]->blocks[0][xBlock][zBlock] = 1;
+                _chunks[3]->blocks[0][xBlock][zBlock] = 3;
+                _chunks[4]->blocks[0][xBlock][zBlock] = 3;
+                _chunks[5]->blocks[0][xBlock][zBlock] = 3;
+                _chunks[6]->blocks[0][xBlock][zBlock] = 2;
+                _chunks[7]->blocks[0][xBlock][zBlock] = 2;
+                _chunks[8]->blocks[0][xBlock][zBlock] = 2;
             }
         }
 
