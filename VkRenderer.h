@@ -19,6 +19,9 @@ namespace VkVoxel {
     public:
         bool framebufferResized = false;
 
+        virtual std::shared_ptr<Chunk> createChunk(int x, int y);
+        virtual void setChunks(const std::vector<std::shared_ptr<Chunk>>& chunkList);
+
         virtual void cleanup();
         virtual void initialize();
         virtual void render();
@@ -27,15 +30,13 @@ namespace VkVoxel {
         void setWindow(GLFWwindow* window);
 
     private:
+        std::vector<std::shared_ptr<VkChunk>> _chunks;
         std::shared_ptr<VkManager> _manager;
 
         // Just testing with a single chunk for now
         VkTextureAtlas* textureAtlas;
         void createTextureAtlas();
         VkSampler textureSampler;
-
-        VkChunk* chunk;
-        void createChunk();
 
         // Window functions and members
         GLFWwindow* window = nullptr;
@@ -76,6 +77,9 @@ namespace VkVoxel {
         bool hasStencilComponent(VkFormat format);
         void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memoryUsage, VkImage& image, VmaAllocation& imageAllocation);
         void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+
+        size_t _minUboAlignment;
+        size_t getMinUboAlignment();
 
         // Vulkan constants
         const std::vector<const char*> validationLayers = {

@@ -2,6 +2,7 @@
 #define __VK_VOXEL_APPLICATION_
 
 #include "VkRenderer.h"
+#include "World.h"
 
 namespace VkVoxel {
     class VkVoxelApplication {
@@ -19,8 +20,9 @@ namespace VkVoxel {
         float lastMouseX;
         float lastMouseY;
 
-        VkRenderer renderer;
+        std::shared_ptr<VkRenderer> renderer;
         std::shared_ptr<Camera> camera;
+        World world;
         GLFWwindow* window;
     };
 }

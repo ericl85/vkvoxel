@@ -25,9 +25,7 @@ namespace VkVoxel {
     };
 
     struct UniformBufferObject {
-        glm::mat4x4 model;
-        glm::mat4x4 view;
-        glm::mat4x4 proj;
+        glm::mat4x4 transform ;
     };
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {

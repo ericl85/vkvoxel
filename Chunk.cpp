@@ -7,7 +7,8 @@
 
 namespace VkVoxel {
     Chunk::Chunk(uint32_t x, uint32_t z) {
-        model = glm::mat4x4(1.0f);
+        _model = glm::mat4x4(1.0f);
+        _model = glm::translate(_model, glm::vec3((float)(x * CHUNK_SIZE * 2.0f), 0, (float)(z * CHUNK_SIZE * 2.0f)));
 
         // Zero out the blocks
         for (int yBlock = 0; yBlock < CHUNK_HEIGHT; yBlock++) {
@@ -66,6 +67,10 @@ namespace VkVoxel {
 
         // Now call the implementation of the build buffers method.
         prepare(vertices, indices);
+    }
+
+    glm::mat4x4 Chunk::getTransform(const glm::mat4x4& proj, const glm::mat4x4& view) {
+        return (proj * view * _model);
     }
 
     uint32_t Chunk::getVertexCount() {

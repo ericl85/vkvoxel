@@ -27,28 +27,23 @@ namespace VkVoxel {
     }
 
     void VkVoxelApplication::resizeFramebuffer() {
-        renderer.framebufferResized = true;
+        renderer->framebufferResized = true;
     }
 
     void VkVoxelApplication::mainLoop() {
         while (!glfwWindowShouldClose(window)) {
             glfwPollEvents();
             
-            glm::vec3 cameraPos = camera->getPosition();
-            glm::vec3 cameraFront = camera->getFront();
+            InputState inputState;
 
             if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-                cameraPos -= glm::normalize(glm::cross(cameraFront, glm::vec3(0.0f, 1.0f, 0.0f))) * 0.01f;
+                inputState.leftSpeed = 1.0f;
             if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-                cameraPos += glm::normalize(glm::cross(cameraFront, glm::vec3(0.0f, 1.0f, 0.0f))) * 0.01f;
+                inputState.rightSpeed = 1.0f;
             if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-                cameraPos += cameraFront * 0.01f;
+                inputState.forwardSpeed = 1.0f;
             if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-                cameraPos -= cameraFront * 0.01f;
-            if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-                cameraPos += glm::vec3(0.0f, 1.0f, 0.0f) * 0.01f;
-            if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-                cameraPos -= glm::vec3(0.0f, 1.0f, 0.0f) * 0.01f;
+                inputState.backwardSpeed = 1.0f;
 
             if (firstMouse) {
                 lastMouseX = mouseX;
@@ -59,26 +54,14 @@ namespace VkVoxel {
             float xOffset = mouseX - lastMouseX;
             float yOffset = lastMouseY - mouseY;
 
-            float yaw = camera->getYaw();
-            float pitch = camera->getPitch();
-            yaw += xOffset * 0.5f;
-            pitch += yOffset * 0.5f;
-
-            if (pitch > 89.0f) {
-                pitch = 89.0f;
-            }
-            if (pitch < -89.0f) {
-                pitch = -89.0f;
-            }
-
-            camera->setRotation(pitch, yaw);
+            inputState.yawSpeed = xOffset;
+            inputState.pitchSpeed = yOffset;
 
             lastMouseX = mouseX;
             lastMouseY = mouseY;
 
-            camera->setPosition(cameraPos);
-
-            renderer.render();
+            world.update(inputState);
+            world.render();
         }
     }
     
@@ -88,18 +71,20 @@ namespace VkVoxel {
         window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "VkVoxel Application", nullptr, nullptr);
         glfwSetWindowUserPointer(window, this);
         glfwSetCursorPosCallback(window, mouse_callback);
-        renderer.setWindow(window);
+
+        renderer = std::make_shared<VkRenderer>();
+        renderer->setWindow(window);
         
         camera = std::make_shared<Camera>(WINDOW_WIDTH, WINDOW_HEIGHT);
         camera->setPosition(glm::vec3(0.0f, 2.0f, -8.0f));
-        renderer.setCamera(camera);
 
-        renderer.initialize();
+        renderer->initialize();
+        world.initialize(renderer, camera);
     }
 
     void VkVoxelApplication::cleanup() {
-        renderer.waitIdle();
-        renderer.cleanup();
+        renderer->waitIdle();
+        renderer->cleanup();
 
         glfwDestroyWindow(window);
         glfwTerminate();

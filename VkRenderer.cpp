@@ -30,7 +30,9 @@ namespace VkVoxel {
         }
 
         // Cleanup our chunk
-        chunk->cleanup();
+        for (auto chunk : _chunks) {
+            chunk->cleanup();
+        }
 
         // Cleanup sync objects
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -87,6 +89,8 @@ namespace VkVoxel {
         createDepthResources();
         createFramebuffers();
         createCommandBuffers();
+
+        _camera->rebuildProjection(width, height);
     }
 
     void VkRenderer::initialize() {
@@ -104,7 +108,8 @@ namespace VkVoxel {
         createSurface(_manager->getInstance());
 
         // Now setup the vulkan device
-        _manager->setupDevice(surface);
+        _manager->setupDevice(surface, MAX_FRAMES_IN_FLIGHT);
+        _minUboAlignment = getMinUboAlignment();
 
         createSwapChain();
         createImageViews();
@@ -125,7 +130,7 @@ namespace VkVoxel {
         blockTypes[3].id = 3;
         blockTypes[3].vertexes = BLOCK_VERTICES;
 
-        for (size_t i = 0; i < BLOCK_VERTICES.size() - 4; i += 4) {
+        for (size_t i = 0; i < BLOCK_VERTICES.size(); i += 4) {
             // Do top face
             if (i == 16) {
                 blockTypes[1].vertexes[i + 0].texCoord = { 0.0f, 0.0f };
@@ -152,12 +157,7 @@ namespace VkVoxel {
             blockTypes[3].vertexes[i + 3].texCoord = { 0.0f, 1.0f };
         }
 
-        createChunk();
-
-        createUniformBuffers();
         createDescriptorPool();
-        createDescriptorSets();
-        createCommandBuffers();
         createSyncObjects();
 
         framebufferResized = false;
@@ -167,31 +167,10 @@ namespace VkVoxel {
         this->window = window;
     }
 
-    void VkRenderer::createChunk() {
-        chunk = new VkChunk(0, 0, _manager);
-        for (uint32_t x = 0; x < CHUNK_SIZE; x++) {
-            for (uint32_t z = 0; z < CHUNK_SIZE; z++) {
-                chunk->blocks[0][x][z] = 1;
-            }
-        }
+    std::shared_ptr<Chunk> VkRenderer::createChunk(int x, int y) {
+        std::shared_ptr<Chunk> chunk = std::make_shared<VkChunk>(x, y, _manager);
 
-        chunk->blocks[0][8][8] = 2;
-        chunk->blocks[0][2][2] = 3;
-        chunk->blocks[0][2][3] = 3;
-        chunk->blocks[0][2][4] = 3;
-        chunk->blocks[0][2][5] = 3;
-        chunk->blocks[0][2][6] = 3;
-        chunk->blocks[0][2][7] = 3;
-        chunk->blocks[0][2][8] = 3;
-        chunk->blocks[0][2][9] = 3;
-        chunk->blocks[0][2][10] = 3;
-        chunk->blocks[0][2][11] = 3;
-        chunk->blocks[0][2][12] = 3;
-        chunk->blocks[0][2][13] = 3;
-        chunk->blocks[1][4][8] = 2;
-        chunk->blocks[1][6][8] = 2;
-
-        chunk->build(blockTypes);
+        return chunk;
     }
 
     void VkRenderer::createTextureAtlas() {
@@ -199,20 +178,34 @@ namespace VkVoxel {
         textureAtlas->initialize();
     }
 
+    void VkRenderer::setChunks(const std::vector<std::shared_ptr<Chunk>>& chunks) {
+        _chunks.resize(chunks.size());
+
+        for (size_t i = 0; i < _chunks.size(); i++) {
+            _chunks[i] = std::dynamic_pointer_cast<VkChunk>(chunks[i]);
+            _chunks[i]->build(blockTypes);
+        }
+
+        createUniformBuffers();
+        createDescriptorSets();
+        createCommandBuffers();
+    }
+
     void VkRenderer::updateUniformBuffer(uint32_t imageIndex) {
-        UniformBufferObject ubo = {};
-        ubo.model = chunk->model;
-        ubo.view = _camera->getView();
-        ubo.proj = _camera->getProjection();
-
-        // Compensate for OpenGL vs. Vulkan Y coordinate flipping
-        ubo.proj[1][1] *= -1;
-
         VmaAllocator allocator = _manager->getAllocator();
 
-        void* data;
-        vmaMapMemory(allocator, uniformBufferAllocations[imageIndex], &data);
-        memcpy(data, &ubo, sizeof(ubo));
+        glm::mat4x4 proj = _camera->getProjection();
+        glm::mat4x4 view = _camera->getView();
+        proj[1][1] *= -1;
+
+        char* data;
+        vmaMapMemory(allocator, uniformBufferAllocations[imageIndex], (void**)&data);
+
+        for (size_t i = 0; i < _chunks.size(); i++) {
+            UniformBufferObject ubo = { _chunks[i]->getTransform(proj, view) };
+            memcpy(data + (_minUboAlignment * i), &ubo, sizeof(ubo));
+        }
+
         vmaUnmapMemory(allocator, uniformBufferAllocations[imageIndex]);
     }
 
@@ -434,7 +427,7 @@ namespace VkVoxel {
     void VkRenderer::createDescriptorSetLayout() {
         VkDescriptorSetLayoutBinding uboLayoutBinding = {};
         uboLayoutBinding.binding = 0;
-        uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
         uboLayoutBinding.descriptorCount = 1;
         uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
         uboLayoutBinding.pImmutableSamplers = nullptr;
@@ -620,7 +613,7 @@ namespace VkVoxel {
     }
 
     void VkRenderer::createUniformBuffers() {
-        VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+        VkDeviceSize bufferSize = getMinUboAlignment() * _chunks.size();
 
         uniformBuffers.resize(swapChainImages.size());
         uniformBufferAllocations.resize(swapChainImages.size());
@@ -642,12 +635,12 @@ namespace VkVoxel {
         VkSamplerCreateInfo samplerInfo = {};
         samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         samplerInfo.magFilter = VK_FILTER_LINEAR;
-        samplerInfo.minFilter = VK_FILTER_LINEAR;
+        samplerInfo.minFilter = VK_FILTER_NEAREST;
         samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
         samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
         samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.anisotropyEnable = VK_TRUE;
-        samplerInfo.maxAnisotropy = 16;
+        samplerInfo.anisotropyEnable = VK_FALSE;
+        //samplerInfo.maxAnisotropy = 16;
         samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
         samplerInfo.unnormalizedCoordinates = VK_FALSE;
         samplerInfo.compareEnable = VK_FALSE;
@@ -666,7 +659,7 @@ namespace VkVoxel {
         VkDevice device = _manager->getDevice();
 
         std::array<VkDescriptorPoolSize, 2> poolSizes = {};
-        poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
         poolSizes[0].descriptorCount = static_cast<uint32_t>(swapChainImages.size());
         poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         poolSizes[1].descriptorCount = static_cast<uint32_t>(swapChainImages.size());
@@ -715,7 +708,7 @@ namespace VkVoxel {
             descriptorWrites[0].dstSet = descriptorSets[i];
             descriptorWrites[0].dstBinding = 0;
             descriptorWrites[0].dstArrayElement = 0;
-            descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
             descriptorWrites[0].descriptorCount = 1;
             descriptorWrites[0].pBufferInfo = &bufferInfo;
             descriptorWrites[0].pImageInfo = nullptr;
@@ -764,7 +757,6 @@ namespace VkVoxel {
             renderPassInfo.renderArea.offset = { 0, 0 };
             renderPassInfo.renderArea.extent = swapChainExtent;
 
-
             std::array<VkClearValue, 2> clearValues = {};
             clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
             clearValues[1].depthStencil = { 1.0f, 0 };
@@ -773,15 +765,22 @@ namespace VkVoxel {
 
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
             vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-            
-            // Get all the vertex buffers
-            VkBuffer vertexBuffers[] = { chunk->vertexBuffer };
 
             VkDeviceSize offsets[] = { 0 };
-            vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);
-            vkCmdBindIndexBuffer(commandBuffers[i], chunk->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-            vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
-            vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(chunk->getIndexCount()), 1, 0, 0, 0);
+
+            // TODO: Apparently I should have a single vertex buffer with offsets
+            //       This seems like complete madness, but something to explore.
+            for (size_t j = 0; j < _chunks.size(); j++) {
+                VkDeviceSize offsets[] = { 0 };
+
+                uint32_t dynamicOffset = j * static_cast<uint32_t>(_minUboAlignment);
+
+                vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &_chunks[j]->vertexBuffer, offsets);
+                vkCmdBindIndexBuffer(commandBuffers[i], _chunks[j]->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+                vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 1, &dynamicOffset);
+                vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(_chunks[j]->getIndexCount()), 1, 0, 0, 0);
+            }
+
             vkCmdEndRenderPass(commandBuffers[i]);
 
             if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
@@ -1072,6 +1071,22 @@ namespace VkVoxel {
 
     bool VkRenderer::hasStencilComponent(VkFormat format) {
         return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
+    }
+
+    size_t VkRenderer::getMinUboAlignment() {
+        VkPhysicalDevice physicalDevice = _manager->getPhysicalDevice();
+        
+        VkPhysicalDeviceProperties props;
+        vkGetPhysicalDeviceProperties(physicalDevice, &props);
+        
+        size_t dynamicAlignment = sizeof(UniformBufferObject);
+        size_t minUboAlignment = (size_t)props.limits.minUniformBufferOffsetAlignment;
+
+        if (minUboAlignment > 0) {
+            dynamicAlignment = (dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1);
+        }
+
+        return dynamicAlignment;
     }
     
 #pragma endregion UTILITY FUNCTIONS

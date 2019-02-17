@@ -10,6 +10,7 @@ namespace VkVoxel {
     public:
         Camera(uint32_t resWidth, uint32_t resHeight);
         
+        void rebuildProjection(uint32_t resWidth, uint32_t resHeight);
         glm::mat4x4 getProjection();
         glm::mat4x4 getView();
         

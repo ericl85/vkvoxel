@@ -6,8 +6,8 @@ namespace VkVoxel {
         _position = glm::vec3(0.0f, 1.0f, 0.0f);
         _front = glm::vec3(0.0f, 1.0f, 1.0f);
 
-        _projection = glm::infinitePerspective(glm::radians(45.0f), resWidth / (float)resHeight, 0.1f);
-        //_projection = glm::perspective(glm::radians(45.0f), resWidth / (float)resHeight, 0.1f, 10.0f);
+        //_projection = glm::infinitePerspective(glm::radians(45.0f), resWidth / (float)resHeight, 0.1f);
+        _projection = glm::perspective(glm::radians(45.0f), resWidth / (float)resHeight, 0.1f, 1000.0f);
         _view = glm::lookAt(_position, _position + _front, glm::vec3(0.0f, 1.0f, 0.0f));
 
         _yaw = 0.0f;
@@ -15,6 +15,10 @@ namespace VkVoxel {
 
         // Update our camera frustum
         _frustum.fromCamera(_projection, _view);
+    }
+
+    void Camera::rebuildProjection(uint32_t resWidth, uint32_t resHeight) {
+        _projection = glm::perspective(glm::radians(45.0f), resWidth / (float)resHeight, 0.1f, 1000.0f);
     }
 
     glm::mat4x4 Camera::getProjection() {

@@ -1,3 +1,4 @@
+#include <array>
 #include <set>
 #include <string>
 #include "VkManager.h"
@@ -15,11 +16,15 @@ namespace VkVoxel {
         setupDebugCallback();
     }
 
-    void VkManager::setupDevice(VkSurfaceKHR surface) {
+    void VkManager::setupDevice(VkSurfaceKHR surface, uint32_t framesInFlight) {
+        _framesInFlight = framesInFlight;
+
         pickPhysicalDevice(surface);
         createLogicalDevice(surface);
         createAllocator();
         createCommandPool();
+        createCommandPool();
+        createDescriptorPool(framesInFlight);
     }
 
     VkInstance VkManager::getInstance() {
@@ -95,7 +100,7 @@ namespace VkVoxel {
 
         vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
 
-        // TODO: Something smarter with fences here so we don't have to block the whole render thread
+        // TODO: Something smarter with fences and a transfer queue here so we don't have to block the whole render thread
         vkQueueWaitIdle(graphicsQueue);
 
         vkFreeCommandBuffers(_device, _commandPool, 1, &commandBuffer);
@@ -234,6 +239,28 @@ namespace VkVoxel {
         if (vkCreateCommandPool(_device, &poolInfo, nullptr, &_commandPool) != VK_SUCCESS) {
             throw std::runtime_error("failed to create command pool!");
         }
+    }
+
+    void VkManager::createDescriptorPool(uint32_t poolCount) {
+        std::array<VkDescriptorPoolSize, 2> poolSizes = {};
+        poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        poolSizes[0].descriptorCount = poolCount;
+        poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        poolSizes[1].descriptorCount = poolCount;
+
+        VkDescriptorPoolCreateInfo poolInfo = {};
+        poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+        poolInfo.pPoolSizes = poolSizes.data();
+        poolInfo.maxSets = poolCount;
+
+        if (vkCreateDescriptorPool(_device, &poolInfo, nullptr, &_descriptorPool) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create descriptor pool!");
+        }
+    }
+
+    VkDescriptorPool VkManager::getDescriptorPool() {
+        return _descriptorPool;
     }
 
     bool VkManager::checkValidationLayerSupport() {
@@ -442,5 +469,17 @@ namespace VkVoxel {
 
     bool VkManager::hasStencilComponent(VkFormat format) {
         return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
+    }
+
+    uint32_t VkManager::getFrameCount() {
+        return _framesInFlight;
+    }
+
+    uint32_t VkManager::getCurrentFrame() {
+        return _currentFrame;
+    }
+
+    void VkManager::setCurrentFrame(uint32_t currentFrame) {
+        _currentFrame = currentFrame;
     }
 }

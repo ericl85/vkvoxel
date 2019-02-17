@@ -5,6 +5,8 @@ namespace VkVoxel {
         _prepared = false;
 
         _manager = manager;
+
+        uint32_t frameCount = _manager->getFrameCount();
     }
 
     void VkChunk::prepare(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) {

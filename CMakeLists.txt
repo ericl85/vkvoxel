@@ -38,6 +38,7 @@ add_executable(vkvoxel
   Camera.h
   Chunk.h
   Chunk.cpp
+  InputState.h
   Plane.cpp
   Plane.h
   Frustum.cpp
@@ -59,6 +60,8 @@ add_executable(vkvoxel
   VkVoxelApplication.h
   VkVoxelApplication.cpp
   VkUtil.h
+  World.h
+  World.cpp
 )
 
 add_dependencies(vkvoxel Shaders)

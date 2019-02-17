@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "Camera.h"
+#include "Chunk.h"
 
 namespace VkVoxel {
     class Renderer {
@@ -15,6 +16,9 @@ namespace VkVoxel {
         virtual void cleanup() = 0;
         virtual void render() = 0;
         virtual void waitIdle() = 0;
+
+        virtual std::shared_ptr<Chunk> createChunk(int x, int y) = 0;
+        virtual void setChunks(const std::vector<std::shared_ptr<Chunk>>& chunkList) = 0;
 
         std::shared_ptr<Camera> getCamera();
         void setCamera(std::shared_ptr<Camera> camera);

@@ -18,6 +18,8 @@ namespace VkVoxel {
         VkCommandPool _commandPool;
         VkQueue graphicsQueue;
         VkQueue presentQueue;
+        VkDescriptorPool _descriptorPool;
+        VkDescriptorSetLayout _descriptorSetLayout;
         
         // Initialization
         void createInstance();
@@ -26,6 +28,8 @@ namespace VkVoxel {
         void createLogicalDevice(VkSurfaceKHR surface);
         void createAllocator();
         void createCommandPool();
+        void createDescriptorPool(uint32_t poolCount);
+        void createDescriptorSetLayout();
 
         bool checkValidationLayerSupport();
         std::vector<const char *> getRequiredExtensions();
@@ -46,10 +50,12 @@ namespace VkVoxel {
         };
 
         bool _enableValidationLayers;
+        uint32_t _framesInFlight;
+        uint32_t _currentFrame;
 
     public:
         void setupInstance(bool enableValidationLayers);
-        void setupDevice(VkSurfaceKHR surface);
+        void setupDevice(VkSurfaceKHR surface, uint32_t framesInFlight);
         void cleanup();
         void cleanupInstance();
 
@@ -60,6 +66,11 @@ namespace VkVoxel {
         VkCommandPool getCommandPool();
         VkQueue getGraphicsQueue();
         VkQueue getPresentQueue();
+        VkDescriptorPool getDescriptorPool();
+
+        uint32_t getFrameCount();
+        void setCurrentFrame(uint32_t currentFrame);
+        uint32_t getCurrentFrame();
 
         // Single time command buffer prep
         VkCommandBuffer beginSingleTimeCommands();
