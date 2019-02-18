@@ -8,3 +8,7 @@ At the moment, it's heavily based on the awesome tutorial at https://vulkan-tuto
 To build, you need the Vulkan SDK, GLFW, GLM, and CMake. There is a CMake post build task to re-compile the shaders when they change, but it only works in Windows at the moment.
 
 I'm releasing this under the MIT license. Do whatever the heck you want with it.
+
+Here's a recent screenshot:
+
+![Screenshot](screenshot.png)

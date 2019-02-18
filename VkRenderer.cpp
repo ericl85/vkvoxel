@@ -124,29 +124,6 @@ namespace VkVoxel {
         prepareTextureAtlas();
         createTextureSampler();
 
-        blockTypes.resize(4);
-        blockTypes[1].frontTexture = 1;
-        blockTypes[1].leftTexture = 1;
-        blockTypes[1].rightTexture = 1;
-        blockTypes[1].backTexture = 1;
-        blockTypes[1].topTexture = 0;
-        blockTypes[1].topColor = glm::vec3(0.4f, 0.8f, 0.2f);
-        blockTypes[1].bottomTexture = 2;
-
-        blockTypes[2].frontTexture = 2;
-        blockTypes[2].leftTexture = 2;
-        blockTypes[2].rightTexture = 2;
-        blockTypes[2].backTexture = 2;
-        blockTypes[2].topTexture = 2;
-        blockTypes[2].bottomTexture = 2;
-
-        blockTypes[3].frontTexture = 3;
-        blockTypes[3].leftTexture = 3;
-        blockTypes[3].rightTexture = 3;
-        blockTypes[3].backTexture = 3;
-        blockTypes[3].topTexture = 3;
-        blockTypes[3].bottomTexture = 3;
-
         createDescriptorPool();
         createSyncObjects();
 

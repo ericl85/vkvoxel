@@ -41,6 +41,8 @@ add_executable(vkvoxel
   InputState.h
   Plane.cpp
   Plane.h
+  FastNoise.h
+  FastNoise.cpp
   Frustum.cpp
   Frustum.h
   Renderer.cpp

@@ -38,7 +38,7 @@
             },
             "top": {
                 "texture": 0,
-                "color": [ 1.0, 1.0, 1.0 ]
+                "color": [ 0.4, 0.7, 0.2 ]
             },
             "bottom": {
                 "texture": 2,
