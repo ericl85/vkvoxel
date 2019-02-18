@@ -51,15 +51,16 @@ namespace VkVoxel {
         float yaw = _camera->getYaw();
         float pitch = _camera->getPitch();
 
-        float cameraSpeed = 0.001f;
+        float cameraSpeed = 2.0f;
+        float cameraSensitivity = 0.5f;
 
         // Update the camera position
         cameraPos += (cameraFront * tickTime * (inputState.forwardSpeed - inputState.backwardSpeed) * cameraSpeed);
         cameraPos += glm::normalize(glm::cross(cameraFront, glm::vec3(0.0f, 1.0f, 0.0f))) * tickTime * (inputState.rightSpeed - inputState.leftSpeed) * cameraSpeed;
 
         // Update the camera rotation
-        yaw += inputState.yawSpeed;
-        pitch += inputState.pitchSpeed;
+        yaw += inputState.yawSpeed * cameraSensitivity;
+        pitch += inputState.pitchSpeed * cameraSensitivity;
         if (pitch > 89.0f) {
             pitch = 89.0f;
         }
@@ -69,6 +70,8 @@ namespace VkVoxel {
 
         _camera->setPosition(cameraPos);
         _camera->setRotation(pitch, yaw);
+
+        _lastTime = currentTime;
     }
 
     void World::render() {

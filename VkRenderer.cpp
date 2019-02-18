@@ -133,28 +133,33 @@ namespace VkVoxel {
         for (size_t i = 0; i < BLOCK_VERTICES.size(); i += 4) {
             // Do top face
             if (i == 16) {
-                blockTypes[1].vertexes[i + 0].texCoord = { 0.0f, 0.0f };
-                blockTypes[1].vertexes[i + 1].texCoord = { 0.5f, 0.0f };
-                blockTypes[1].vertexes[i + 2].texCoord = { 0.5f, 0.5f };
-                blockTypes[1].vertexes[i + 3].texCoord = { 0.0f, 0.5f };
+                blockTypes[1].vertexes[i + 0].texCoord = { 0.0f, 1.0f / 16.0f };
+                blockTypes[1].vertexes[i + 1].texCoord = { 1.0f / 16.0f, 1.0f / 16.0f };
+                blockTypes[1].vertexes[i + 2].texCoord = { 1.0f / 16.0f, 0.0f };
+                blockTypes[1].vertexes[i + 3].texCoord = { 0.0f, 0.0f };
+
+                blockTypes[1].vertexes[i + 0].color = glm::vec3(0.4f, 0.8f, 0.2f);
+                blockTypes[1].vertexes[i + 1].color = glm::vec3(0.4f, 0.8f, 0.2f);
+                blockTypes[1].vertexes[i + 2].color = glm::vec3(0.4f, 0.8f, 0.2f);
+                blockTypes[1].vertexes[i + 3].color = glm::vec3(0.4f, 0.8f, 0.2f);
             }
             else
             {
-                blockTypes[1].vertexes[i + 0].texCoord = { 0.5f, 0.0f };
-                blockTypes[1].vertexes[i + 1].texCoord = { 1.0f, 0.0f };
-                blockTypes[1].vertexes[i + 2].texCoord = { 1.0f, 0.5f };
-                blockTypes[1].vertexes[i + 3].texCoord = { 0.5f, 0.5f };
+                blockTypes[1].vertexes[i + 0].texCoord = { 3.0f / 16.0f, 1.0f / 16.0f };
+                blockTypes[1].vertexes[i + 1].texCoord = { 4.0f / 16.0f, 1.0f / 16.0f };
+                blockTypes[1].vertexes[i + 2].texCoord = { 4.0f / 16.0f, 0.0f };
+                blockTypes[1].vertexes[i + 3].texCoord = { 3.0f / 16.0f, 0.0f };
             }
 
-            blockTypes[2].vertexes[i + 0].texCoord = { 0.5f, 0.0f };
-            blockTypes[2].vertexes[i + 1].texCoord = { 1.0f, 0.0f };
-            blockTypes[2].vertexes[i + 2].texCoord = { 1.0f, 0.5f };
-            blockTypes[2].vertexes[i + 3].texCoord = { 0.5f, 0.5f };
+            blockTypes[2].vertexes[i + 0].texCoord = { 1.0f / 16.0f, 0.0f };
+            blockTypes[2].vertexes[i + 1].texCoord = { 2.0f / 16.0f, 0.0f };
+            blockTypes[2].vertexes[i + 2].texCoord = { 2.0f / 16.0f, 1.0f / 16.0f };
+            blockTypes[2].vertexes[i + 3].texCoord = { 1.0f / 16.0f, 1.0f / 16.0f };
 
-            blockTypes[3].vertexes[i + 0].texCoord = { 0.0f, 0.5f };
-            blockTypes[3].vertexes[i + 1].texCoord = { 0.5f, 0.5f };
-            blockTypes[3].vertexes[i + 2].texCoord = { 0.5f, 1.0f };
-            blockTypes[3].vertexes[i + 3].texCoord = { 0.0f, 1.0f };
+            blockTypes[3].vertexes[i + 0].texCoord = { 7.0f / 16.0f, 0.0f };
+            blockTypes[3].vertexes[i + 1].texCoord = { 8.0f / 16.0f, 0.0f };
+            blockTypes[3].vertexes[i + 2].texCoord = { 8.0f / 16.0f, 1.0f / 16.0f };
+            blockTypes[3].vertexes[i + 3].texCoord = { 7.0f / 16.0f, 1.0f / 16.0f };
         }
 
         createDescriptorPool();
@@ -634,13 +639,13 @@ namespace VkVoxel {
     void VkRenderer::createTextureSampler() {
         VkSamplerCreateInfo samplerInfo = {};
         samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        samplerInfo.magFilter = VK_FILTER_LINEAR;
+        samplerInfo.magFilter = VK_FILTER_NEAREST;
         samplerInfo.minFilter = VK_FILTER_NEAREST;
         samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
         samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
         samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.anisotropyEnable = VK_FALSE;
-        //samplerInfo.maxAnisotropy = 16;
+        samplerInfo.anisotropyEnable = VK_TRUE;
+        samplerInfo.maxAnisotropy = 16;
         samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
         samplerInfo.unnormalizedCoordinates = VK_FALSE;
         samplerInfo.compareEnable = VK_FALSE;
