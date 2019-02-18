@@ -77,7 +77,7 @@ namespace VkVoxel {
         void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
         // Image layout transition
-        void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+        void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t layerCount);
     };
 }
 

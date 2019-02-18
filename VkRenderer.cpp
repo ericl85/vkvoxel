@@ -125,42 +125,35 @@ namespace VkVoxel {
         blockTypes.resize(4);
         blockTypes[1].id = 1;
         blockTypes[1].vertexes = BLOCK_VERTICES;
+        blockTypes[1].frontTexture = 1;
+        blockTypes[1].leftTexture = 1;
+        blockTypes[1].rightTexture = 1;
+        blockTypes[1].backTexture = 1;
+        blockTypes[1].topTexture = 0;
+        blockTypes[1].bottomTexture = 2;
+
+        blockTypes[1].vertexes[16 + 0].color = glm::vec3(0.4f, 0.8f, 0.2f);
+        blockTypes[1].vertexes[16 + 1].color = glm::vec3(0.4f, 0.8f, 0.2f);
+        blockTypes[1].vertexes[16 + 2].color = glm::vec3(0.4f, 0.8f, 0.2f);
+        blockTypes[1].vertexes[16 + 3].color = glm::vec3(0.4f, 0.8f, 0.2f);
+
         blockTypes[2].id = 2;
         blockTypes[2].vertexes = BLOCK_VERTICES;
+        blockTypes[2].frontTexture = 2;
+        blockTypes[2].leftTexture = 2;
+        blockTypes[2].rightTexture = 2;
+        blockTypes[2].backTexture = 2;
+        blockTypes[2].topTexture = 2;
+        blockTypes[2].bottomTexture = 2;
+
         blockTypes[3].id = 3;
         blockTypes[3].vertexes = BLOCK_VERTICES;
-
-        for (size_t i = 0; i < BLOCK_VERTICES.size(); i += 4) {
-            // Do top face
-            if (i == 16) {
-                blockTypes[1].vertexes[i + 0].texCoord = { 0.0f, 1.0f / 16.0f };
-                blockTypes[1].vertexes[i + 1].texCoord = { 1.0f / 16.0f, 1.0f / 16.0f };
-                blockTypes[1].vertexes[i + 2].texCoord = { 1.0f / 16.0f, 0.0f };
-                blockTypes[1].vertexes[i + 3].texCoord = { 0.0f, 0.0f };
-
-                blockTypes[1].vertexes[i + 0].color = glm::vec3(0.4f, 0.8f, 0.2f);
-                blockTypes[1].vertexes[i + 1].color = glm::vec3(0.4f, 0.8f, 0.2f);
-                blockTypes[1].vertexes[i + 2].color = glm::vec3(0.4f, 0.8f, 0.2f);
-                blockTypes[1].vertexes[i + 3].color = glm::vec3(0.4f, 0.8f, 0.2f);
-            }
-            else
-            {
-                blockTypes[1].vertexes[i + 0].texCoord = { 3.0f / 16.0f, 1.0f / 16.0f };
-                blockTypes[1].vertexes[i + 1].texCoord = { 4.0f / 16.0f, 1.0f / 16.0f };
-                blockTypes[1].vertexes[i + 2].texCoord = { 4.0f / 16.0f, 0.0f };
-                blockTypes[1].vertexes[i + 3].texCoord = { 3.0f / 16.0f, 0.0f };
-            }
-
-            blockTypes[2].vertexes[i + 0].texCoord = { 1.0f / 16.0f, 0.0f };
-            blockTypes[2].vertexes[i + 1].texCoord = { 2.0f / 16.0f, 0.0f };
-            blockTypes[2].vertexes[i + 2].texCoord = { 2.0f / 16.0f, 1.0f / 16.0f };
-            blockTypes[2].vertexes[i + 3].texCoord = { 1.0f / 16.0f, 1.0f / 16.0f };
-
-            blockTypes[3].vertexes[i + 0].texCoord = { 7.0f / 16.0f, 0.0f };
-            blockTypes[3].vertexes[i + 1].texCoord = { 8.0f / 16.0f, 0.0f };
-            blockTypes[3].vertexes[i + 2].texCoord = { 8.0f / 16.0f, 1.0f / 16.0f };
-            blockTypes[3].vertexes[i + 3].texCoord = { 7.0f / 16.0f, 1.0f / 16.0f };
-        }
+        blockTypes[3].frontTexture = 3;
+        blockTypes[3].leftTexture = 3;
+        blockTypes[3].rightTexture = 3;
+        blockTypes[3].backTexture = 3;
+        blockTypes[3].topTexture = 3;
+        blockTypes[3].bottomTexture = 3;
 
         createDescriptorPool();
         createSyncObjects();
@@ -179,8 +172,12 @@ namespace VkVoxel {
     }
 
     void VkRenderer::createTextureAtlas() {
-        textureAtlas = new VkTextureAtlas("textures/textureatlas.png", _manager);
-        textureAtlas->initialize();
+        textureAtlas = new VkTextureAtlas(_manager);
+        textureAtlas->addTexture("grass_top", "textures/grass.png");
+        textureAtlas->addTexture("grass_side", "textures/grass_side.png");
+        textureAtlas->addTexture("dirt", "textures/dirt.png");
+        textureAtlas->addTexture("stone", "textures/stone.png");
+        textureAtlas->prepare();
     }
 
     void VkRenderer::setChunks(const std::vector<std::shared_ptr<Chunk>>& chunks) {

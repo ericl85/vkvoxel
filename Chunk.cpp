@@ -41,10 +41,10 @@ namespace VkVoxel {
 
                         // Front face neighbor test: if we're at the front or if the block in front of us is air, we add the front vertices
                         if (zBlock == 0 || blocks[yBlock][xBlock][zBlock - 1] == 0) {
-                            vertices.push_back({ FRONT_FACE[0] + blockTranslation, blockType.vertexes[0].color, blockType.vertexes[0].texCoord });
-                            vertices.push_back({ FRONT_FACE[1] + blockTranslation, blockType.vertexes[1].color, blockType.vertexes[1].texCoord });
-                            vertices.push_back({ FRONT_FACE[2] + blockTranslation, blockType.vertexes[2].color, blockType.vertexes[2].texCoord });
-                            vertices.push_back({ FRONT_FACE[3] + blockTranslation, blockType.vertexes[3].color, blockType.vertexes[3].texCoord });
+                            vertices.push_back({ FRONT_FACE[0] + blockTranslation, blockType.vertexes[0].color, glm::vec3(0.0f, 1.0f, blockType.frontTexture) });
+                            vertices.push_back({ FRONT_FACE[1] + blockTranslation, blockType.vertexes[1].color, glm::vec3(1.0f, 1.0f, blockType.frontTexture) });
+                            vertices.push_back({ FRONT_FACE[2] + blockTranslation, blockType.vertexes[2].color, glm::vec3(1.0f, 0.0f, blockType.frontTexture) });
+                            vertices.push_back({ FRONT_FACE[3] + blockTranslation, blockType.vertexes[3].color, glm::vec3(0.0f, 0.0f, blockType.frontTexture) });
 
                             indices.push_back(_vertexCount);
                             indices.push_back(_vertexCount + 1);
@@ -59,10 +59,10 @@ namespace VkVoxel {
 
                         // Left face neighbor test
                         if (xBlock == 0 || blocks[yBlock][xBlock - 1][zBlock] == 0) {
-                            vertices.push_back({ LEFT_FACE[0] + blockTranslation, blockType.vertexes[4].color, blockType.vertexes[4].texCoord });
-                            vertices.push_back({ LEFT_FACE[1] + blockTranslation, blockType.vertexes[5].color, blockType.vertexes[5].texCoord });
-                            vertices.push_back({ LEFT_FACE[2] + blockTranslation, blockType.vertexes[6].color, blockType.vertexes[6].texCoord });
-                            vertices.push_back({ LEFT_FACE[3] + blockTranslation, blockType.vertexes[7].color, blockType.vertexes[7].texCoord });
+                            vertices.push_back({ LEFT_FACE[0] + blockTranslation, blockType.vertexes[4].color, glm::vec3(0.0f, 1.0f, blockType.leftTexture) });
+                            vertices.push_back({ LEFT_FACE[1] + blockTranslation, blockType.vertexes[5].color, glm::vec3(1.0f, 1.0f, blockType.leftTexture) });
+                            vertices.push_back({ LEFT_FACE[2] + blockTranslation, blockType.vertexes[6].color, glm::vec3(1.0f, 0.0f, blockType.leftTexture) });
+                            vertices.push_back({ LEFT_FACE[3] + blockTranslation, blockType.vertexes[7].color, glm::vec3(0.0f, 0.0f, blockType.leftTexture) });
 
                             indices.push_back(_vertexCount);
                             indices.push_back(_vertexCount + 1);
@@ -77,10 +77,10 @@ namespace VkVoxel {
 
                         // Right face neighbor test
                         if (xBlock == (CHUNK_SIZE - 1) || blocks[yBlock][xBlock + 1][zBlock] == 0) {
-                            vertices.push_back({ RIGHT_FACE[0] + blockTranslation, blockType.vertexes[8].color, blockType.vertexes[8].texCoord });
-                            vertices.push_back({ RIGHT_FACE[1] + blockTranslation, blockType.vertexes[9].color, blockType.vertexes[9].texCoord });
-                            vertices.push_back({ RIGHT_FACE[2] + blockTranslation, blockType.vertexes[10].color, blockType.vertexes[10].texCoord });
-                            vertices.push_back({ RIGHT_FACE[3] + blockTranslation, blockType.vertexes[11].color, blockType.vertexes[11].texCoord });
+                            vertices.push_back({ RIGHT_FACE[0] + blockTranslation, blockType.vertexes[8].color,  glm::vec3(0.0f, 1.0f, blockType.rightTexture) });
+                            vertices.push_back({ RIGHT_FACE[1] + blockTranslation, blockType.vertexes[9].color,  glm::vec3(1.0f, 1.0f, blockType.rightTexture) });
+                            vertices.push_back({ RIGHT_FACE[2] + blockTranslation, blockType.vertexes[10].color, glm::vec3(1.0f, 0.0f, blockType.rightTexture) });
+                            vertices.push_back({ RIGHT_FACE[3] + blockTranslation, blockType.vertexes[11].color, glm::vec3(0.0f, 0.0f, blockType.rightTexture) });
 
                             indices.push_back(_vertexCount);
                             indices.push_back(_vertexCount + 1);
@@ -95,10 +95,10 @@ namespace VkVoxel {
 
                         // Back face neighbor test
                         if (zBlock == (CHUNK_SIZE - 1) || blocks[yBlock][xBlock][zBlock + 1] == 0) {
-                            vertices.push_back({ BACK_FACE[0] + blockTranslation, blockType.vertexes[12].color, blockType.vertexes[12].texCoord });
-                            vertices.push_back({ BACK_FACE[1] + blockTranslation, blockType.vertexes[13].color, blockType.vertexes[13].texCoord });
-                            vertices.push_back({ BACK_FACE[2] + blockTranslation, blockType.vertexes[14].color, blockType.vertexes[14].texCoord });
-                            vertices.push_back({ BACK_FACE[3] + blockTranslation, blockType.vertexes[15].color, blockType.vertexes[15].texCoord });
+                            vertices.push_back({ BACK_FACE[0] + blockTranslation, blockType.vertexes[12].color, glm::vec3(0.0f, 1.0f, blockType.backTexture) });
+                            vertices.push_back({ BACK_FACE[1] + blockTranslation, blockType.vertexes[13].color, glm::vec3(1.0f, 1.0f, blockType.backTexture) });
+                            vertices.push_back({ BACK_FACE[2] + blockTranslation, blockType.vertexes[14].color, glm::vec3(1.0f, 0.0f, blockType.backTexture) });
+                            vertices.push_back({ BACK_FACE[3] + blockTranslation, blockType.vertexes[15].color, glm::vec3(0.0f, 0.0f, blockType.backTexture) });
 
                             indices.push_back(_vertexCount);
                             indices.push_back(_vertexCount + 1);
@@ -113,10 +113,10 @@ namespace VkVoxel {
 
                         // Top face neighbor test
                         if (yBlock == (CHUNK_HEIGHT - 1) || blocks[yBlock + 1][xBlock][zBlock] == 0) {
-                            vertices.push_back({ TOP_FACE[0] + blockTranslation, blockType.vertexes[16].color, blockType.vertexes[16].texCoord });
-                            vertices.push_back({ TOP_FACE[1] + blockTranslation, blockType.vertexes[17].color, blockType.vertexes[17].texCoord });
-                            vertices.push_back({ TOP_FACE[2] + blockTranslation, blockType.vertexes[18].color, blockType.vertexes[18].texCoord });
-                            vertices.push_back({ TOP_FACE[3] + blockTranslation, blockType.vertexes[19].color, blockType.vertexes[19].texCoord });
+                            vertices.push_back({ TOP_FACE[0] + blockTranslation, blockType.vertexes[16].color, glm::vec3(0.0f, 1.0f, blockType.topTexture) });
+                            vertices.push_back({ TOP_FACE[1] + blockTranslation, blockType.vertexes[17].color, glm::vec3(1.0f, 1.0f, blockType.topTexture) });
+                            vertices.push_back({ TOP_FACE[2] + blockTranslation, blockType.vertexes[18].color, glm::vec3(1.0f, 0.0f, blockType.topTexture) });
+                            vertices.push_back({ TOP_FACE[3] + blockTranslation, blockType.vertexes[19].color, glm::vec3(0.0f, 0.0f, blockType.topTexture) });
 
                             indices.push_back(_vertexCount);
                             indices.push_back(_vertexCount + 1);
@@ -131,10 +131,10 @@ namespace VkVoxel {
 
                         // Bottom face neighbor test
                         if (yBlock == 0 || blocks[yBlock - 1][xBlock][zBlock] == 0) {
-                            vertices.push_back({ BOTTOM_FACE[0] + blockTranslation, blockType.vertexes[20].color, blockType.vertexes[20].texCoord });
-                            vertices.push_back({ BOTTOM_FACE[1] + blockTranslation, blockType.vertexes[21].color, blockType.vertexes[21].texCoord });
-                            vertices.push_back({ BOTTOM_FACE[2] + blockTranslation, blockType.vertexes[22].color, blockType.vertexes[22].texCoord });
-                            vertices.push_back({ BOTTOM_FACE[3] + blockTranslation, blockType.vertexes[23].color, blockType.vertexes[23].texCoord });
+                            vertices.push_back({ BOTTOM_FACE[0] + blockTranslation, blockType.vertexes[20].color, glm::vec3(0.0f, 1.0f, blockType.bottomTexture) });
+                            vertices.push_back({ BOTTOM_FACE[1] + blockTranslation, blockType.vertexes[21].color, glm::vec3(1.0f, 1.0f, blockType.bottomTexture) });
+                            vertices.push_back({ BOTTOM_FACE[2] + blockTranslation, blockType.vertexes[22].color, glm::vec3(1.0f, 0.0f, blockType.bottomTexture) });
+                            vertices.push_back({ BOTTOM_FACE[3] + blockTranslation, blockType.vertexes[23].color, glm::vec3(0.0f, 0.0f, blockType.bottomTexture) });
 
                             indices.push_back(_vertexCount);
                             indices.push_back(_vertexCount + 1);

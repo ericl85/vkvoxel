@@ -7,7 +7,7 @@
 namespace VkVoxel {
     class VkTextureAtlas : public TextureAtlas {
     public:
-        VkTextureAtlas(std::string fileName, std::shared_ptr<VkManager> manager);
+        VkTextureAtlas(std::shared_ptr<VkManager> manager);
         virtual void cleanup();
 
         VkImage image;
@@ -15,7 +15,7 @@ namespace VkVoxel {
         VmaAllocation imageAllocation;
 
     protected:
-        virtual void prepare(uint32_t texWidth, uint32_t texHeight, int texChannels, stbi_uc* pixels);
+        virtual void prepareForGPU();
 
     private:
         std::shared_ptr<VkManager> _manager;
