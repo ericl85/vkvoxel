@@ -20,7 +20,10 @@ namespace VkVoxel {
         bool framebufferResized = false;
 
         virtual std::shared_ptr<Chunk> createChunk(int x, int y);
+        virtual std::shared_ptr<TextureAtlas> createTextureAtlas();
         virtual void setChunks(const std::vector<std::shared_ptr<Chunk>>& chunkList);
+
+        void initializeDevice();
 
         virtual void cleanup();
         virtual void initialize();
@@ -31,11 +34,10 @@ namespace VkVoxel {
 
     private:
         std::vector<std::shared_ptr<VkChunk>> _chunks;
+        std::shared_ptr<VkTextureAtlas> _textureAtlas;
         std::shared_ptr<VkManager> _manager;
 
-        // Just testing with a single chunk for now
-        VkTextureAtlas* textureAtlas;
-        void createTextureAtlas();
+        void prepareTextureAtlas();
         VkSampler textureSampler;
 
         // Window functions and members
@@ -122,8 +124,6 @@ namespace VkVoxel {
         VkImage depthImage;
         VmaAllocation depthImageMemory;
         VkImageView depthImageView;
-
-        std::vector<BlockType> blockTypes;
     };
 }
 

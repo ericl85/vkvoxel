@@ -23,7 +23,6 @@ namespace VkVoxel {
         createLogicalDevice(surface);
         createAllocator();
         createCommandPool();
-        createCommandPool();
         createDescriptorPool(framesInFlight);
     }
 

@@ -1,4 +1,5 @@
 #include "glm/trigonometric.hpp"
+#include "json.hpp"
 #include "VkVoxelApplication.h"
 
 #define WINDOW_WIDTH 800
@@ -13,6 +14,8 @@ void mouse_callback(GLFWwindow* window, double xPos, double yPos) {
     mouseX = (float)xPos;
     mouseY = (float)yPos;
 }
+
+using json = nlohmann::json;
 
 namespace VkVoxel {
     void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
@@ -78,6 +81,63 @@ namespace VkVoxel {
         
         camera = std::make_shared<Camera>(WINDOW_WIDTH, WINDOW_HEIGHT);
         camera->setPosition(glm::vec3(0.0f, 2.0f, -8.0f));
+        renderer->initializeDevice();
+
+        std::shared_ptr<TextureAtlas> textureAtlas = renderer->createTextureAtlas();
+        std::ifstream i("textures/blocks.json");
+        json j;
+        i >> j;
+
+        for (auto texture : j["textures"]) {
+            textureAtlas->addTexture(texture["name"], texture["file"]);
+        }
+
+        for (auto blockTypeJson : j["blockTypes"]) {
+            BlockType blockType;
+            blockType.frontTexture = blockTypeJson["front"]["texture"];
+            blockType.frontColor = glm::vec3(
+                blockTypeJson["front"]["color"][0],
+                blockTypeJson["front"]["color"][1],
+                blockTypeJson["front"]["color"][2]
+            );
+
+            blockType.leftTexture = blockTypeJson["left"]["texture"];
+            blockType.leftColor = glm::vec3(
+                blockTypeJson["left"]["color"][0],
+                blockTypeJson["left"]["color"][1],
+                blockTypeJson["left"]["color"][2]
+            );
+
+            blockType.rightTexture = blockTypeJson["right"]["texture"];
+            blockType.rightColor = glm::vec3(
+                blockTypeJson["right"]["color"][0],
+                blockTypeJson["right"]["color"][1],
+                blockTypeJson["right"]["color"][2]
+            );
+
+            blockType.backTexture = blockTypeJson["back"]["texture"];
+            blockType.backColor = glm::vec3(
+                blockTypeJson["back"]["color"][0],
+                blockTypeJson["back"]["color"][1],
+                blockTypeJson["back"]["color"][2]
+            );
+
+            blockType.topTexture = blockTypeJson["top"]["texture"];
+            blockType.topColor = glm::vec3(
+                blockTypeJson["top"]["color"][0],
+                blockTypeJson["top"]["color"][1],
+                blockTypeJson["top"]["color"][2]
+            );
+
+            blockType.bottomTexture = blockTypeJson["bottom"]["texture"];
+            blockType.bottomColor = glm::vec3(
+                blockTypeJson["bottom"]["color"][0],
+                blockTypeJson["bottom"]["color"][1],
+                blockTypeJson["bottom"]["color"][2]
+            );
+
+            renderer->addBlockType(blockType);
+        }
 
         renderer->initialize();
         world.initialize(renderer, camera);

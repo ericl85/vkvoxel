@@ -1,0 +1,103 @@
+{
+    "textures": [
+        {
+            "name": "grass_top",
+            "file": "textures/grass.png"
+        },
+        {
+            "name": "grass_sides",
+            "file": "textures/grass_side.png"
+        },
+        {
+            "name": "dirt",
+            "file": "textures/dirt.png"
+        },
+        {
+            "name": "stone",
+            "file": "textures/stone.png"
+        }
+    ],
+    "blockTypes": [
+        {
+            "name": "grass",
+            "front": {
+                "texture": 1,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "left": {
+                "texture": 1,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "right": {
+                "texture": 1,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "back": {
+                "texture": 1,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "top": {
+                "texture": 0,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "bottom": {
+                "texture": 2,
+                "color": [ 1.0, 1.0, 1.0 ]
+            }
+        },
+        {
+            "name": "dirt",
+            "front": {
+                "texture": 2,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "left": {
+                "texture": 2,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "right": {
+                "texture": 2,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "back": {
+                "texture": 2,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "top": {
+                "texture": 2,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "bottom": {
+                "texture": 2,
+                "color": [ 1.0, 1.0, 1.0 ]
+            }
+        },
+        {
+            "name": "stone",
+            "front": {
+                "texture": 3,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "left": {
+                "texture": 3,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "right": {
+                "texture": 3,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "back": {
+                "texture": 3,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "top": {
+                "texture": 3,
+                "color": [ 1.0, 1.0, 1.0 ]
+            },
+            "bottom": {
+                "texture": 3,
+                "color": [ 1.0, 1.0, 1.0 ]
+            }
+        }
+    ]
+}

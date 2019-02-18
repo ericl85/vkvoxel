@@ -16,4 +16,8 @@ namespace VkVoxel {
     std::shared_ptr<Camera> Renderer::getCamera() {
         return _camera;
     }
+
+    void Renderer::addBlockType(BlockType blockType) {
+        blockTypes.push_back(blockType);
+    }
 }
