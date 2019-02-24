@@ -22,18 +22,23 @@ namespace VkVoxel {
         _chunks[8] = _renderer->createChunk(-1, 1);
         
         FastNoise fastNoise;
-        fastNoise.SetNoiseType(FastNoise::CubicFractal);
-        fastNoise.SetFrequency(0.005f);
+        fastNoise.SetNoiseType(FastNoise::SimplexFractal);
+        fastNoise.SetFrequency(0.001f);
         fastNoise.SetSeed(rand());
 
         // Temporary: Generate a ground
         for (int chunk = 0; chunk < 9; chunk++) {
             for (int xBlock = 0; xBlock < CHUNK_SIZE; xBlock++) {
                 for (int zBlock = 0; zBlock < CHUNK_SIZE; zBlock++) {
-                    float noiseHeight = (fastNoise.GetNoise((CHUNK_SIZE * chunk) + xBlock, (CHUNK_SIZE * chunk) + zBlock) * 128);
-                    int height = glm::max((int)floor(noiseHeight), 1);
+                    float noiseHeight = (fastNoise.GetNoise((CHUNK_SIZE * _chunks[chunk]->xPos) + xBlock, (CHUNK_SIZE * _chunks[chunk]->zPos) + zBlock)) * 64;
+                    int height = glm::max((int)floor(noiseHeight) + 64, 1);
                     for (int yBlock = 0; yBlock < height; yBlock++) {
-                        _chunks[chunk]->blocks[yBlock][xBlock][zBlock] = glm::max(1, height % 4);
+                        if (yBlock == (height - 1)) {
+                            _chunks[chunk]->blocks[yBlock][xBlock][zBlock] = 1;
+                        }
+                        else {
+                            _chunks[chunk]->blocks[yBlock][xBlock][zBlock] = 2;
+                        }
                     }
                     
                 }
@@ -54,7 +59,7 @@ namespace VkVoxel {
         float yaw = _camera->getYaw();
         float pitch = _camera->getPitch();
 
-        float cameraSpeed = 2.0f;
+        float cameraSpeed = 25.0f;
         float cameraSensitivity = 0.5f;
 
         // Update the camera position

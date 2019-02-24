@@ -7,6 +7,9 @@
 
 namespace VkVoxel {
     Chunk::Chunk(int x, int z) {
+        xPos = x;
+        zPos = z;
+
         _model = glm::mat4x4(1.0f);
         _model = glm::translate(_model, glm::vec3((float)(x * CHUNK_SIZE), 0, (float)(z * CHUNK_SIZE)));
 

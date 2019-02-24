@@ -170,15 +170,12 @@ namespace VkVoxel {
         glm::mat4x4 view = _camera->getView();
         proj[1][1] *= -1;
 
-        char* data;
-        vmaMapMemory(allocator, uniformBufferAllocations[imageIndex], (void**)&data);
-
+        char* data = (char *)_uniformBufferMemory[imageIndex].pMappedData;
         for (size_t i = 0; i < _chunks.size(); i++) {
             UniformBufferObject ubo = { _chunks[i]->getTransform(proj, view) };
             memcpy(data + (_minUboAlignment * i), &ubo, sizeof(ubo));
         }
 
-        vmaUnmapMemory(allocator, uniformBufferAllocations[imageIndex]);
     }
 
     void VkRenderer::render() {
@@ -589,6 +586,7 @@ namespace VkVoxel {
 
         uniformBuffers.resize(swapChainImages.size());
         uniformBufferAllocations.resize(swapChainImages.size());
+        _uniformBufferMemory.resize(swapChainImages.size());
 
         for (size_t i = 0; i < swapChainImages.size(); i++) {
             VkBufferCreateInfo createInfo = {};
@@ -598,8 +596,9 @@ namespace VkVoxel {
 
             VmaAllocationCreateInfo allocInfo = {};
             allocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+            allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
-            vmaCreateBuffer(_manager->getAllocator(), &createInfo, &allocInfo, &uniformBuffers[i], &uniformBufferAllocations[i], nullptr);
+            vmaCreateBuffer(_manager->getAllocator(), &createInfo, &allocInfo, &uniformBuffers[i], &uniformBufferAllocations[i], &_uniformBufferMemory[i]);
         }
     }
 

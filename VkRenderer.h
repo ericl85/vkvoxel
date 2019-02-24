@@ -64,6 +64,7 @@ namespace VkVoxel {
         void cleanupSwapChain();
 
         // Rendering
+        std::vector<VmaAllocationInfo> _uniformBufferMemory;
         void updateUniformBuffer(uint32_t imageIndex);
  
         // Vulkan utility functions

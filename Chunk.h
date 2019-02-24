@@ -13,6 +13,7 @@
 namespace VkVoxel {
     class Chunk {
     public:
+        int xPos, zPos;
         uint32_t blocks[CHUNK_HEIGHT][CHUNK_SIZE][CHUNK_SIZE];
 
         Chunk(int x, int y);
